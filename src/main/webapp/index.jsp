@@ -8,9 +8,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-    <title>$Title$</title>
+    <title>Welcome To Servlet</title>
   </head>
   <body>
-  $END$
+  Keeping learning Servlet Concept for better understanding of <b>Spring Framework</b>
   </body>
 </html>

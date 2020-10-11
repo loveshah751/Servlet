@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-@WebServlet(urlPatterns = "/hello")
+@WebServlet("/hello")
 public class HelloServlet extends HttpServlet {
 
     @Override
