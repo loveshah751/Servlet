@@ -1,0 +1,16 @@
+.scannerwork*
+.idea*
+.gradle*
+out
+target
+build
+tmp
+.classpath
+.project
+.settings
+env
+**/bin/
+audit*.log
+*.DS_Store
+dataSources/
+classes/
