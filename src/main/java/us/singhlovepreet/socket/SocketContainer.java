@@ -1,6 +1,7 @@
 package us.singhlovepreet.socket;
 
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -103,14 +104,11 @@ public abstract class SocketContainer {
         this.clientSocket.ifPresent(this::closeConnection);
     }
 
-    public String getReceivedMessage() {
+    public String getMessageFromBufferReader() {
         if (this.reader.isPresent()) {
             try {
-                var message = reader.get().readLine();
-                if (message.equalsIgnoreCase("Stop")) {
-                    log.info("Socket request for the Termination");
-                    stopConnection();
-                }
+                var readerObj = reader.get();
+                var message = readerObj.ready() ? reader.get().readLine() : "Sorry No Message Available";
                 return message;
             } catch (IOException e) {
                 return "Sorry No Message Available";
@@ -130,6 +128,16 @@ public abstract class SocketContainer {
     private Optional errorReturn(Exception e) {
         log.log(Level.SEVERE, "Error Message " + e.getLocalizedMessage());
         return Optional.empty();
+    }
+
+    public  Pair<String,Boolean> getReceivedMessage() {
+        var message = this.getMessageFromBufferReader();
+        if (message.equalsIgnoreCase("stop")) {
+            log.info("Socket request for the Termination");
+           this.stopConnection();
+            return Pair.of("Connection Terminated",Boolean.FALSE);
+        }
+        return Pair.of(message,Boolean.TRUE);
     }
 
     public Scanner getScanner(){

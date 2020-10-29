@@ -16,11 +16,20 @@ public class ServerRunTime {
         var portNumber = Integer.parseInt(sc.next());
 
         server.startConnection(null, portNumber);
+        interactWithClient(server,sc);
+    }
+
+    private static void interactWithClient(GreeterServer server,Scanner sc) {
         welcomeMessage(server);
-        var messageReceived = server.getReceivedMessage();
-        System.out.println("Server> Message Received: "+messageReceived);
-        log.info("Server > MessageReceived: " + messageReceived);
-        sendMessage(server,sc);
+        for(Boolean keepConnectionAlive = true ; keepConnectionAlive != Boolean.FALSE; ){
+            var messagePair = server.getReceivedMessage();
+            var messageReceived = messagePair.getLeft();
+            keepConnectionAlive = messagePair.getRight();
+            log.info("Server > MessageReceived: " + messageReceived);
+            if(keepConnectionAlive){
+                sendMessage(server,sc);
+            }
+        }
     }
 
     private static void sendMessage(GreeterServer server,Scanner sc) {
