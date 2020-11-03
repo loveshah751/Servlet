@@ -10,7 +10,7 @@ import lombok.extern.java.Log;
  * For more Info about the Socket Programming @see {@link SocketContainer}
  */
 @Log
-public class GreeterServer extends SocketContainer {
+public class ServerContainer extends SocketContainer {
 
     @Override
     public void startConnection(String ipAddress, int port) {
@@ -18,7 +18,7 @@ public class GreeterServer extends SocketContainer {
         serverSocket = createServerSocket(port);
 
         if (serverSocket.isPresent()) {
-            log.info("Server with address " + serverSocket.get().getInetAddress().toString() + "started at port number " + serverSocket.get().getLocalPort());
+            log.info("Waiting for Client to connected on the port Number "+port);
             clientSocket = registerClientWithServer(port);
             writer = getPrintWriter();
             reader = getBufferReader();

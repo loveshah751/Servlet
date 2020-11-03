@@ -39,6 +39,7 @@ public abstract class SocketContainer {
     public Optional<ServerSocket> serverSocket;
     public Optional<BufferedReader> reader;
     public Optional<PrintWriter> writer;
+    public Scanner scanner;
 
     public abstract void startConnection(String ipAddress, int port);
 
@@ -141,6 +142,6 @@ public abstract class SocketContainer {
     }
 
     public Scanner getScanner(){
-        return new Scanner(System.in);
+        return this.scanner == null ?  new Scanner(System.in): this.scanner;
     }
 }

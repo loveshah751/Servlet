@@ -1,16 +1,15 @@
-package us.singhlovepreet.socket;
+package us.singhlovepreet.socket.runtime;
 
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.tuple.Pair;
+import us.singhlovepreet.socket.ClientContainer;
 
-import java.util.Map;
 import java.util.Scanner;
 
 @Log
-public class ClientRunTime {
+public class ChatiingClient {
 
     public static void main(String[] args) {
-        GreeterClient client = new GreeterClient();
+        ClientContainer client = new ClientContainer();
         var sc = client.getScanner();
         log.info("Please enter the Valid IP Address");
         var ipAddress = sc.next();
@@ -22,7 +21,7 @@ public class ClientRunTime {
         interactWithServer(client,sc);
     }
 
-    private static void interactWithServer(GreeterClient client,Scanner sc) {
+    private static void interactWithServer(ClientContainer client, Scanner sc) {
         welcomeMessage(client);
         for(Boolean keepConnectionAlive = true ; keepConnectionAlive != Boolean.FALSE; ){
             var messagePair = client.getReceivedMessage();
@@ -35,7 +34,7 @@ public class ClientRunTime {
         }
     }
 
-    private static void sendMessage(GreeterClient client, Scanner sc) {
+    private static void sendMessage(ClientContainer client, Scanner sc) {
         if (client.connectionAlive()) {
             log.info("Client > Enter your Message: ");
             var messageToSend = sc.nextLine();
@@ -44,7 +43,7 @@ public class ClientRunTime {
 
     }
 
-    private static void welcomeMessage(GreeterClient client) {
+    private static void welcomeMessage(ClientContainer client) {
         if (client.connectionAlive()) {
             String automaticMessage = "Hello Server! Thanks for accepting the Connection";
             log.info("Client > Enter Automatic Welcome Message: " + automaticMessage);
