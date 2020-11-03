@@ -3,7 +3,7 @@ package us.singhlovepreet.socket;
 import lombok.extern.java.Log;
 
 @Log
-public class GreeterClient extends SocketContainer {
+public class ClientContainer extends SocketContainer {
 
     @Override
     public void startConnection(String ipAddress, int port) {

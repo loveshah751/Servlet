@@ -1,15 +1,16 @@
-package us.singhlovepreet.socket;
+package us.singhlovepreet.socket.runtime;
 
 import lombok.extern.java.Log;
+import us.singhlovepreet.socket.ServerContainer;
 
 import java.util.Scanner;
 
 @Log
-public class ServerRunTime {
+public class ChattingServer {
 
     public static void main(String[] args) {
 
-        GreeterServer server = new GreeterServer();
+        ServerContainer server = new ServerContainer();
         var sc = server.getScanner();
 
         log.info("Please enter the Valid Port Number ");
@@ -19,7 +20,7 @@ public class ServerRunTime {
         interactWithClient(server,sc);
     }
 
-    private static void interactWithClient(GreeterServer server,Scanner sc) {
+    private static void interactWithClient(ServerContainer server, Scanner sc) {
         welcomeMessage(server);
         for(Boolean keepConnectionAlive = true ; keepConnectionAlive != Boolean.FALSE; ){
             var messagePair = server.getReceivedMessage();
@@ -32,7 +33,7 @@ public class ServerRunTime {
         }
     }
 
-    private static void sendMessage(GreeterServer server,Scanner sc) {
+    private static void sendMessage(ServerContainer server, Scanner sc) {
         if (server.isServerAlive()) {
             log.info("Server > Enter your Message: ");
             var mesageToSend = sc.nextLine();
@@ -40,7 +41,7 @@ public class ServerRunTime {
         }
     }
 
-    private static void welcomeMessage(GreeterServer server){
+    private static void welcomeMessage(ServerContainer server){
         if(server.isServerAlive()) {
             String automaticMessage = "Hello Client!";
             log.info("Server > Enter Automatic Welcome Message: "+automaticMessage);
