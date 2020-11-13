@@ -1,6 +1,9 @@
 package us.singhlovepreet.socket;
 
 import lombok.extern.java.Log;
+import us.singhlovepreet.utils.WebConstants;
+
+import java.util.logging.Level;
 
 /**
  * This class will demonstrate from the Server Machine perspective using TCP protocol in socket Programming.
@@ -13,18 +16,27 @@ import lombok.extern.java.Log;
 public class ServerContainer extends SocketContainer {
 
     @Override
-    public void startConnection(String ipAddress, int port) {
-        log.info("Server Connection In progress");
+    public boolean startConnection(String ipAddress, int port) {
+        log.info(WebConstants.SERVER_CONNECTION_IN_PROGRESS);
         serverSocket = createServerSocket(port);
 
         if (serverSocket.isPresent()) {
-            log.info("Waiting for Client to connected on the port Number "+port);
+            log.info(WebConstants.WAITING_FOR_CLIENT_TO_CONNECT + port);
             clientSocket = registerClientWithServer(port);
-            writer = getPrintWriter();
-            reader = getBufferReader();
-            log.info("Successfully registered the Client with Server!");
+
+            if(clientSocket.isPresent()) {
+                writer = createPrintWriter();
+                reader = createBufferedReader();
+                log.info(WebConstants.CLIENT_REGISTERED_SUCCESSFULLY);
+                log.info(WebConstants.SERVER_CONNECTION_STARTED);
+            }else{
+                log.log(Level.SEVERE,WebConstants.ERROR_REGISTERING_CLIENT);
+            }
+        }else {
+            log.log(Level.SEVERE, WebConstants.ERROR_STARTING_SERVER);
         }
-        log.info("Successfully started the Server a connection!");
+
+        return serverSocket.isPresent();
     }
 
     public boolean isServerAlive() {

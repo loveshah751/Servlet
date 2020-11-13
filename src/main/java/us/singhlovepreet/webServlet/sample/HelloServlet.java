@@ -1,4 +1,4 @@
-package us.singhlovepreet.webServlet.intro;
+package us.singhlovepreet.webServlet.sample;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

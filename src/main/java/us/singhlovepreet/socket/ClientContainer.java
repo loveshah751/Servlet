@@ -1,17 +1,24 @@
 package us.singhlovepreet.socket;
 
 import lombok.extern.java.Log;
+import us.singhlovepreet.utils.WebConstants;
 
 @Log
 public class ClientContainer extends SocketContainer {
 
     @Override
-    public void startConnection(String ipAddress, int port) {
-        log.info("Client Connection creation started");
+    public boolean startConnection(String ipAddress, int port) {
+        log.info(WebConstants.CLIENT_CONNECTION_CREATION);
         clientSocket = createClientSocket(ipAddress, port);
-        writer = getPrintWriter();
-        reader = getBufferReader();
-        log.info("Successfully established a connection!");
+        if(clientSocket.isPresent()) {
+            writer = createPrintWriter();
+            reader = createBufferedReader();
+            log.info(WebConstants.CONNECTION_SUCCESSFULLY_ESTABLISHED);
+        } else{
+            log.info(WebConstants.CONNECTION_FAILED_TO_ESTABLISHED);
+        }
+
+        return clientSocket.isPresent();
     }
 
     public boolean connectionAlive() {

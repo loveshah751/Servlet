@@ -1,10 +1,12 @@
 package us.singhlovepreet.socket.runtime;
 
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ThreadUtils;
 import us.singhlovepreet.socket.ServerContainer;
+import us.singhlovepreet.utils.WebConstants;
+import us.singhlovepreet.webServlet.internal.Request;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * This Class demonstrate the Web Browser trying to access our custom server content.
@@ -14,17 +16,24 @@ import java.time.LocalDateTime;
 @Log
 public class WebServer {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         var myWebServer = new ServerContainer();
         /** While true because we want to our web Server to keep running.
          * In short, our web server should be capable of accepting the multiple request.
          **/
-        while(true) {
-            myWebServer.startConnection(null,8081);
-            Thread.sleep(5000);
-            readWebBrowserRequest(myWebServer);
-            responseToWebBrowser(myWebServer);
-            myWebServer.stopConnection();
+        while (true) {
+          var serverStarted =  myWebServer.startConnection(null, 8081);
+          /** uncomment this method call to understand the incoming the request format**/
+          //readWebBrowserRequest(myWebServer);
+            if(serverStarted) {
+                var validateRequest = parseWebBrowserRequest(myWebServer);
+                responseToWebBrowser(myWebServer,validateRequest);
+                myWebServer.stopConnection();
+            }
+            else {
+                log.log(Level.SEVERE, WebConstants.FAILED_START_CLIENT_CONNECTION);
+                break;
+            }
         }
     }
 
@@ -33,36 +42,74 @@ public class WebServer {
      * hitting the url:<link>localhost:8081</link>. And our method will simply read all the web content
      * sent by the browser and log it to console.
      * @param myWebServer
+     *              server which holds all the required resources for processing the request
      */
-    private static void readWebBrowserRequest(ServerContainer myWebServer){
-        var webContent = myWebServer.getMessageFromBufferReader();
-        log.info("***********************************************");
-        log.info("Request from the Web Browser");
-        while(!webContent.isEmpty()){
-            log.info(webContent);
-            webContent = myWebServer.getMessageFromBufferReader();
+    private static void readWebBrowserRequest(ServerContainer myWebServer) throws IOException {
+
+        var reader = myWebServer.getBufferReader().get();
+        StringBuilder body = new StringBuilder();
+        while (reader.ready()){
+            body.append((char)reader.read());
         }
 
-        log.info("End of Web Browser Request");
+        String data = body.toString();
         log.info("***********************************************");
+        log.info(WebConstants.WEB_BROWSER_REQUEST);
+        log.info(data);
+        log.info(WebConstants.END_OF_WEB_BROWSER_REQUEST);
+        log.info("***********************************************");
+    }
+
+
+    private static boolean parseWebBrowserRequest(ServerContainer myWebServer) {
+        try {
+            return new Request().parseRequest(myWebServer);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE,WebConstants.REQUEST_PARSING_FAILURE);
+            return false;
+        }
     }
 
     /**
      * This method will simply send the http response back to our browser.
      * As our browser will only able to render the http response on the screen.
+     *
      * @param myWebServer
+     *              server which holds all the required resources for processing the request
      */
-    private static void responseToWebBrowser(ServerContainer myWebServer){
-    var writer = myWebServer.writer;
-    writer.ifPresent(wr ->{
-        wr.println("HTTP/1.1 200 O.K.");
-        wr.println("content-type: text/html");
-        wr.println();
-        wr.println("<html><body> ");
-        wr.println("<p> My web server response : ");
-        wr.println("<p> CurrentTime:"+LocalDateTime.now()+"</p>");
-        wr.println("</body> </html>");
+    private static void responseToWebBrowser(ServerContainer myWebServer, boolean validateRequest) {
+        if (validateRequest) {
+            successResponse(myWebServer);
+        } else {
+            errorResponse(myWebServer);
+        }
+    }
 
-    });
+
+    private static void successResponse(ServerContainer myWebServer) {
+        var writer = myWebServer.writer;
+        writer.ifPresent(wr -> {
+            wr.println(WebConstants.OK);
+            wr.println(WebConstants.CONTENT_TYPE);
+            wr.println();
+            wr.println(WebConstants.HTML_START_TAG);
+            wr.println(WebConstants.PARAGRAPH_TEXT);
+            wr.println(WebConstants.PARAGRAPH_DYNAMIC_TEXT);
+            wr.println(WebConstants.HTML_END_TAG);
+
+        });
+    }
+
+    private static void errorResponse(ServerContainer myWebServer){
+        var writer = myWebServer.writer;
+        writer.ifPresent(wr -> {
+            wr.println(WebConstants.SERVER_ERROR);
+            wr.println(WebConstants.CONTENT_TYPE);
+            wr.println();
+            wr.println(WebConstants.HTML_START_TAG);
+            wr.println(WebConstants.PARAGRAPH_WITH_SERVER_ERROR_MESSAGE);
+            wr.println(WebConstants.HTML_END_TAG);
+
+        });
     }
 }

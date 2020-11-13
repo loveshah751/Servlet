@@ -2,6 +2,7 @@ package us.singhlovepreet.socket;
 
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.tuple.Pair;
+import us.singhlovepreet.utils.WebConstants;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -41,13 +42,19 @@ public abstract class SocketContainer {
     public Optional<PrintWriter> writer;
     public Scanner scanner;
 
-    public abstract void startConnection(String ipAddress, int port);
+    public abstract boolean startConnection(String ipAddress, int port);
 
     public  void sendMessage(String msg){
         this.writer.ifPresent(write -> write.println(msg) );
     };
 
     public Optional<BufferedReader> getBufferReader() {
+        if(this.reader != null &&  this.reader.isPresent()) return this.reader;
+
+        return createBufferedReader();
+    }
+
+    public Optional createBufferedReader() {
         if (clientSocket.isPresent()) {
             try {
                 return Optional.of(new BufferedReader(new InputStreamReader(clientSocket.get().getInputStream())));
@@ -59,6 +66,13 @@ public abstract class SocketContainer {
     }
 
     public Optional<PrintWriter> getPrintWriter() {
+
+        if(this.writer != null && this.writer.isPresent()) return this.writer;
+
+        return createPrintWriter();
+    }
+
+    public Optional createPrintWriter() {
         if (this.clientSocket.isPresent()) {
             try {
                 return Optional.of(new PrintWriter(this.clientSocket.get().getOutputStream(), true));
@@ -80,7 +94,7 @@ public abstract class SocketContainer {
 
     public Optional<Socket> registerClientWithServer(int port) {
 
-        if ( serverSocket.isPresent()) {
+        if (this.serverSocket.isPresent()) {
             try {
                 return Optional.of(this.serverSocket.get().accept());
             } catch (IOException e) {
@@ -99,44 +113,45 @@ public abstract class SocketContainer {
     }
 
     public void stopConnection() {
-        log.info("Terminating All the open Connections");
+        log.info(WebConstants.TERMINATE_OPEN_CONNECTION);
         this.reader.ifPresent(this::closeConnection);
         this.serverSocket.ifPresent(this::closeConnection);
         this.clientSocket.ifPresent(this::closeConnection);
+        this.writer.ifPresent(this::closeConnection);
     }
 
     public String getMessageFromBufferReader() {
-        if (this.reader.isPresent()) {
+        if (this.reader != null && this.reader.isPresent()) {
             try {
                 var readerObj = reader.get();
-                var message = readerObj.ready() ? reader.get().readLine() : "Sorry No Message Available";
+                var message = readerObj.ready() ? reader.get().readLine() : WebConstants.NO_MESSAGE_AVAILABLE;
                 return message;
             } catch (IOException e) {
-                return "Sorry No Message Available";
+                return WebConstants.NO_MESSAGE_AVAILABLE;
             }
         }
-        return "Sorry No Message Available";
+        return WebConstants.NO_MESSAGE_AVAILABLE;
     }
 
     private void closeConnection(Closeable object) {
         try {
             object.close();
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Error Message " + e.getLocalizedMessage());
+            log.log(Level.SEVERE, WebConstants.ERROR_MESSAGE + e.getLocalizedMessage());
         }
     }
 
     private Optional errorReturn(Exception e) {
-        log.log(Level.SEVERE, "Error Message " + e.getLocalizedMessage());
+        log.log(Level.SEVERE, WebConstants.ERROR_MESSAGE + e.getLocalizedMessage());
         return Optional.empty();
     }
 
     public  Pair<String,Boolean> getReceivedMessage() {
         var message = this.getMessageFromBufferReader();
-        if (message.equalsIgnoreCase("stop")) {
-            log.info("Socket request for the Termination");
+        if (message.equalsIgnoreCase(WebConstants.STOP)) {
+            log.info(WebConstants.SOCKET_TERMINATION);
            this.stopConnection();
-            return Pair.of("Connection Terminated",Boolean.FALSE);
+            return Pair.of(WebConstants.CONNECTION_TERMINATED,Boolean.FALSE);
         }
         return Pair.of(message,Boolean.TRUE);
     }
