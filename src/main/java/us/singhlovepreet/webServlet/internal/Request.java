@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Getter
@@ -47,11 +48,11 @@ public class Request {
                     : MethodType.GET;
         }
 
-        private boolean isPost() {
+        public boolean isPost() {
             return this == POST;
         }
 
-        private boolean isGET() {
+        public boolean isGET() {
             return this == GET;
         }
     }
@@ -68,28 +69,32 @@ public class Request {
      * @return <code>true</code> if the request is successfully parsed or else <code> false</code>
      */
     public boolean parseRequest(ServerContainer server) throws IOException {
+        try {
+            String webRequest = server.getMessageFromBufferReader();
+            var webRequestArr = webRequest.split(WebConstants.EMPTY_SPACE);
 
-        String webRequest = server.getMessageFromBufferReader();
-        var webRequestArr = webRequest.split(WebConstants.EMPTY_SPACE);
+            if (webRequestArr.length != 3) return false;
 
-        if (webRequestArr.length != 3) return false;
+            this.requestType = MethodType.get(webRequestArr[0]);
+            var requestUrl = webRequestArr[1];
+            this.protocol = webRequestArr[2];
 
-        this.requestType = MethodType.get(webRequestArr[0]);
-        var requestUrl = webRequestArr[1];
-        this.protocol = webRequestArr[2];
+            if (this.requestType.isGET()) {
+                parseGETRequest(requestUrl);
+                parseHostName(server);
+                parseRequestHeader(server);
+            } else if (this.requestType.isPost()) {
+                this.setPath(requestUrl);
+                parseHostName(server);
+                parseRequestHeader(server);
+                parsePOSTRequest(server);
+            }
 
-        if (this.requestType.isGET()) {
-            parseGETRequest(requestUrl);
-            parseHostName(server);
-            parseRequestHeader(server);
-        } else if (this.requestType.isPost()) {
-            this.setPath(requestUrl);
-            parseHostName(server);
-            parseRequestHeader(server);
-            parsePOSTRequest(server);
+            return Objects.nonNull(this.getHostName()) && Objects.nonNull(this.getRequestType());
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, WebConstants.REQUEST_PARSING_FAILURE);
+            return false;
         }
-
-        return Objects.nonNull(this.getHostName()) && Objects.nonNull(this.getRequestType());
     }
 
     private void parseRequestHeader(ServerContainer server) {
@@ -115,7 +120,7 @@ public class Request {
         var queryStringIndex = StringUtils.indexOf(requestUrl, WebConstants.QUESTION_MARK);
         if (queryStringIndex > -1) {
             this.path = requestUrl.substring(0, queryStringIndex);
-            parseRequestParam(StringUtils.substring(requestUrl, queryStringIndex + 1));
+            this.queryParams = parseRequestParam(StringUtils.substring(requestUrl, queryStringIndex + 1));
             log.info(WebConstants.QUERY_PARAM_LOG_MSG +this.queryParams.toString());
         } else {
             this.path = requestUrl;
@@ -133,6 +138,16 @@ public class Request {
 
         String data = body.toString();
         log.info(WebConstants.REQUEST_BODY_LOG_MSG + data);
+
+        if(isJsonContract(data)){
+            parseJsonRequest(data);
+        }else {
+            this.body = parseRequestParam(data);
+        }
+
+    }
+
+    private void parseJsonRequest(String data) {
         String[] requestObjectArr = preProcessRequestBodyParsing(data);
 
         /**
@@ -159,8 +174,8 @@ public class Request {
      *
      * @param queryParams
      */
-    private void parseRequestParam(String queryParams) {
-        this.queryParams = Arrays.stream(queryParams.split(WebConstants.AND_CHAR)).map(param -> param.split(WebConstants.EQUAL_CHAR))
+    private Map<String, String> parseRequestParam(String queryParams) {
+        return Arrays.stream(queryParams.split(WebConstants.AND_CHAR)).map(param -> param.split(WebConstants.EQUAL_CHAR))
                 .collect(Collectors.toMap(arr -> arr[0], arr1 -> arr1[1],
                         (oldValue, newValue) -> newValue, HashMap::new));
 
@@ -183,5 +198,10 @@ public class Request {
     private boolean isMapEmpty(Map map) {
         return map == null || map.isEmpty();
     }
+
+    private boolean isJsonContract(String requestBody) {
+        return StringUtils.isNotBlank(requestBody) && requestBody.contains(WebConstants.JSON_START_TAG) && requestBody.contains(WebConstants.JSON_END_TAG);
+    }
+
 }
 

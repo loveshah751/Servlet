@@ -12,6 +12,16 @@ plugins {
     id 'java'
     id 'war'
     id "com.bmuschko.tomcat" version "2.5"
+    id "application"
+}
+
+ext {
+    javaMainClass = "us.singhlovepreet.webServlet.runtime.AppServlet"
+}
+
+
+application {
+    mainClassName = javaMainClass
 }
 
 group 'us.singhlovepreet'

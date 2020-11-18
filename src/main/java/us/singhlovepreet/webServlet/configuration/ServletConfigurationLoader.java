@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 /**
@@ -33,7 +34,7 @@ public class ServletConfigurationLoader {
 
     private static Map<String, HttpServlet> createURLContextMap(InputStream configFile) {
         Properties properties = new Properties();
-        Map<String, HttpServlet> urlContextMap = new HashMap<>();
+        Map<String, HttpServlet> urlContextMap = new WeakHashMap<>();
         try {
             properties.load(configFile);
         } catch (IOException e) {

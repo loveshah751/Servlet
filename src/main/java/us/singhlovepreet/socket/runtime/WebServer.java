@@ -79,37 +79,10 @@ public class WebServer {
      */
     private static void responseToWebBrowser(ServerContainer myWebServer, boolean validateRequest) {
         if (validateRequest) {
-            successResponse(myWebServer);
+            WebConstants.successResponse(myWebServer);
         } else {
-            errorResponse(myWebServer);
+            WebConstants.errorResponse500(myWebServer);
         }
     }
 
-
-    private static void successResponse(ServerContainer myWebServer) {
-        var writer = myWebServer.writer;
-        writer.ifPresent(wr -> {
-            wr.println(WebConstants.OK);
-            wr.println(WebConstants.CONTENT_TYPE);
-            wr.println();
-            wr.println(WebConstants.HTML_START_TAG);
-            wr.println(WebConstants.PARAGRAPH_TEXT);
-            wr.println(WebConstants.PARAGRAPH_DYNAMIC_TEXT);
-            wr.println(WebConstants.HTML_END_TAG);
-
-        });
-    }
-
-    private static void errorResponse(ServerContainer myWebServer){
-        var writer = myWebServer.writer;
-        writer.ifPresent(wr -> {
-            wr.println(WebConstants.SERVER_ERROR);
-            wr.println(WebConstants.CONTENT_TYPE);
-            wr.println();
-            wr.println(WebConstants.HTML_START_TAG);
-            wr.println(WebConstants.PARAGRAPH_WITH_SERVER_ERROR_MESSAGE);
-            wr.println(WebConstants.HTML_END_TAG);
-
-        });
-    }
 }

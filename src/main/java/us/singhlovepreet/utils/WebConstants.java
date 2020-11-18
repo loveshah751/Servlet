@@ -3,6 +3,7 @@ package us.singhlovepreet.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import us.singhlovepreet.socket.ServerContainer;
 
 import java.time.LocalDateTime;
 
@@ -51,6 +52,8 @@ public class WebConstants {
 
     public static final String SERVER_ERROR = "HTTP/1.1 500";
 
+    public static final String HTTP_RESOURCE_NOT_FOUND = "HTTP/1.1 404";
+
     public static final String CONTENT_TYPE = "content-type: text/html";
 
     public static final String HTML_START_TAG = "<html><body> ";
@@ -61,6 +64,8 @@ public class WebConstants {
 
     public static final String PARAGRAPH_WITH_SERVER_ERROR_MESSAGE = "<p> Internal Server Error";
 
+    public static final String PARAGRAPH_WITH_RESOURCE_NOT_FOUND= "<p> Resource Not Found 404!";
+
     public static final String QUERY_PARAM_LOG_MSG = "Request Query Param ";
 
     public static final String REQUEST_BODY_LOG_MSG = "Request Query Param ";
@@ -69,7 +74,7 @@ public class WebConstants {
 
     public static final String JSON_START_TAG = "{";
 
-    public static final String JSON_END_TAG = "{";
+    public static final String JSON_END_TAG = "}";
 
     public static final String COMA = ",";
 
@@ -82,4 +87,46 @@ public class WebConstants {
     public static final String COLON_CHAR = ":";
 
     public static final String QUESTION_MARK = "?";
+
+
+    public static void successResponse(ServerContainer myWebServer) {
+        var writer = myWebServer.writer;
+        writer.ifPresent(wr -> {
+            wr.println(WebConstants.OK);
+            wr.println(WebConstants.CONTENT_TYPE);
+            wr.println();
+            wr.println(WebConstants.HTML_START_TAG);
+            wr.println(WebConstants.PARAGRAPH_TEXT);
+            wr.println(WebConstants.PARAGRAPH_DYNAMIC_TEXT);
+            wr.println(WebConstants.HTML_END_TAG);
+
+        });
+    }
+
+    public static void errorResponse500(ServerContainer myWebServer){
+        var writer = myWebServer.writer;
+        writer.ifPresent(wr -> {
+            wr.println(WebConstants.SERVER_ERROR);
+            wr.println(WebConstants.CONTENT_TYPE);
+            wr.println();
+            wr.println(WebConstants.HTML_START_TAG);
+            wr.println(WebConstants.PARAGRAPH_WITH_SERVER_ERROR_MESSAGE);
+            wr.println(WebConstants.HTML_END_TAG);
+
+        });
+    }
+
+
+    public static void errorResponse404(ServerContainer myWebServer){
+        var writer = myWebServer.writer;
+        writer.ifPresent(wr -> {
+            wr.println(WebConstants.HTTP_RESOURCE_NOT_FOUND);
+            wr.println(WebConstants.CONTENT_TYPE);
+            wr.println();
+            wr.println(WebConstants.HTML_START_TAG);
+            wr.println(WebConstants.PARAGRAPH_WITH_RESOURCE_NOT_FOUND);
+            wr.println(WebConstants.HTML_END_TAG);
+
+        });
+    }
 }

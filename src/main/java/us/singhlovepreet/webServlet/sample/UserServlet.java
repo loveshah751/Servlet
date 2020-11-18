@@ -1,27 +1,25 @@
 package us.singhlovepreet.webServlet.sample;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import lombok.extern.java.Log;
 import us.singhlovepreet.webServlet.internal.HttpServlet;
-
-import java.io.IOException;
+import us.singhlovepreet.webServlet.internal.Request;
+import us.singhlovepreet.webServlet.internal.Response;
 
 @Log
 public class UserServlet extends HttpServlet {
-    @Override
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-        //TODO : need to implement later
-    }
 
     @Override
-    public void doGet(){
+    public void doGet(Request httpRequest, Response httpResponse){
         log.info("UserServlet doGet Method default implementation");
     }
 
     @Override
-    public void doPost(){
+    public void doPost(Request httpRequest, Response httpResponse){
         log.info("UserServlet doPost Method default implementation");
+    }
+
+    @Override
+    public void destroy() {
+        log.info("Destroying all the Open Connections for user Servlet Class........");
     }
 }
