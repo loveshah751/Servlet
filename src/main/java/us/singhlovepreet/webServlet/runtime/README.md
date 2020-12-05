@@ -12,5 +12,5 @@ Click submit and server will send you response back with the same information yo
  support for gracefully shutdown hooks. This method will only be called when you click on stop button or OS SIGTERM signal
   to terminate the current process from the OS. </p>
   
-  <h2> Note: This functionality is recently added in the springboot version 3.0 for gracefully shutdown and support more
+  <h2> Note: This functionality is recently added in the springboot version 2.3.0 for gracefully shutdown and support more
    advanced feature with this functionality.</h2>
